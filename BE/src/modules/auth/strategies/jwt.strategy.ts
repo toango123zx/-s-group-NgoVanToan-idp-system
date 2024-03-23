@@ -3,6 +3,7 @@ import { _jwtService } from "../config/jwt.config";
 export const createJwt = async (payload: any): Promise<string> => {
     try {
         const token = _jwtService.signAsync(payload);
+        
         return token;
     } catch (error) {
         throw new Error(error);

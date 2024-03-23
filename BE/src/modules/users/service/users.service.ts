@@ -46,6 +46,29 @@ export class UsersService {
             });
         } catch (error) {
             throw error;
+        };
+    };
+
+    async getUserById(id: string): Promise<User> {
+        try {
+            return await this.prismaService.users.findUnique({
+                select: {
+                    id: true,
+                    username: true,
+                    fullName: true,
+                    roles : {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                },
+                where: {
+                    id: id
+                }
+            });
+        } catch (error) {
+            throw error;
         }
     }
 }

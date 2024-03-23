@@ -1,5 +1,5 @@
 import { IsBoolean, IsDate, IsString } from "class-validator";
-import { Permission } from "../../permissions/models/permission.model";
+import { Permission } from "./permission.model copy";
 
 
 export interface Role {

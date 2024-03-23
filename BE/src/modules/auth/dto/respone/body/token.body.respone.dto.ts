@@ -3,18 +3,20 @@ import { IsDefined, IsNotEmpty, IsString, IsUUID } from "class-validator";
 
 export class TokenBodyResponseDto {
 
-    @IsString()
-    id: string;
+    // @IsString()
+    // id: string;
 
     @IsString()
     @IsNotEmpty()
     accessToken: string;
-
-    constructor(accessToken: string, id: string = createId()) {
+    constructor(accessToken: string) {
         this.accessToken = accessToken;
-        this.id = id;
+    }
+    // constructor(accessToken: string, id: string = createId()) {
+    //     this.accessToken = accessToken;
+    //     this.id = id;
         
-    };
+    // };
     // constructor(idOrAccessToken: string, accessToken?: string) {
     //     if (accessToken === undefined) {
     //         this.accessToken = idOrAccessToken;

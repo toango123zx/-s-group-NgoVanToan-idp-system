@@ -10,13 +10,13 @@ export class JwtService {
 
     async createJwt(data: any): Promise<void> {
         const token: TokenBodyResponseDto = new TokenBodyResponseDto(await createJwt(data));
-        await this.redisService.set(token.id, token.accessToken);
+        // await this.redisService.set(token.id, token.accessToken);
     }
     
-    async updateJwt(keyRedis: string, data: User): Promise<void> {
-        const token: TokenBodyResponseDto = new TokenBodyResponseDto(await createJwt(data), keyRedis);
-        await this.redisService.del(keyRedis);
-        await this.redisService.set(token.id, token.accessToken);
-    }
+    // async updateJwt(keyRedis: string, data: User): Promise<void> {
+    //     const token: TokenBodyResponseDto = new TokenBodyResponseDto(await createJwt(data), keyRedis);
+    //     await this.redisService.del(keyRedis);
+    //     await this.redisService.set(token.id, token.accessToken);
+    // }
 
 }
