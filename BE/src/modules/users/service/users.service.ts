@@ -5,10 +5,10 @@ import { UpdateInfomationBodyRequestDto } from '../dto/request/body/update-infom
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly prismaService: PrismaService) { }
     async getUserByUsername(username: string) {
         try {
-            
+
         } catch (error) {
             throw error;
         }
@@ -34,10 +34,21 @@ export class UsersService {
                     id: true,
                     username: true,
                     fullName: true,
-                    roles : {
+                    email: true,
+                    age: true,
+                    roles: {
                         select: {
                             id: true,
                             name: true
+                        }
+                    }
+                },
+                where: {
+                    roles: {
+                        some: {
+                            NOT: {
+                                name: "superAdmin"
+                            }
                         }
                     }
                 },
@@ -56,7 +67,9 @@ export class UsersService {
                     id: true,
                     username: true,
                     fullName: true,
-                    roles : {
+                    email: true,
+                    age: true,
+                    roles: {
                         select: {
                             id: true,
                             name: true

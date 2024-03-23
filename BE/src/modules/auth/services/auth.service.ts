@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/service/prisma.service';
 import { RegisterBodyRequestDto } from '../dto/request/body/register.body.request.dto';
 import { User } from 'src/modules/users/models/user.model';
+import { RolesService } from './roles.service';
+import { NameRoleEnum } from '../enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,8 @@ export class AuthService {
                     username: true,
                     password: true,
                     fullName: true,
+                    email: true,
+                    age: true,
                     roles: {
                         select: {
                             id: true,
@@ -37,15 +41,20 @@ export class AuthService {
             throw new Error(error);
         }
     }
-
+    
     async registerUser(user: RegisterBodyRequestDto, role: string = 'user'): Promise<boolean> {
         try {
+            if (NameRoleEnum[role] === undefined) {
+                throw new Error('Role is not exist');
+            }
             await this.prismaService.users.create({
                 select: {
                     id: true,
                     username: true,
                     password: true,
                     fullName: true,
+                    email: true,
+                    age: true,
                     roles: {
                         select: {
                             id: true,
@@ -64,16 +73,19 @@ export class AuthService {
                     username: user.username,
                     password: user.password,
                     fullName: user.fullName,
+                    email: user.email,
+                    age: user.age,
                     roles: {
                         connect: {
-                            name: role,
-                        },
+                            name: NameRoleEnum[role],
+                        }
                     }
                 
                 },
             });
             return true;
         } catch (error) {
+            console.log("🚀 ~ AuthService ~ registerUser ~ error:", error)
             throw new Error('Prisma error in registerUser service');
         }
     }

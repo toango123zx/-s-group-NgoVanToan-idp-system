@@ -14,16 +14,24 @@ model Users {
   id        String    @id @default(uuid())
   username  String    @unique
   password  String
+  email     String
   fullName  String
+  age       Int
   createdAt DateTime  @default(now())
   updatedAt DateTime?
   deletedAt DateTime?
   roles     Roles[]
 }
 
+enum Role {
+  superAdmin
+  admin
+  user
+}
+
 model Roles {
   id          String        @id @default(uuid())
-  name        String        @unique
+  name        Role          @unique
   description String
   isEditable  Boolean       @default(false)
   createdAt   DateTime      @default(now())

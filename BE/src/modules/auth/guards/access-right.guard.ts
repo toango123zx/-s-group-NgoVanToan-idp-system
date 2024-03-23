@@ -14,7 +14,11 @@ export class AccessRightGuard implements CanActivate {
       ACCESS_RIGHT_META_DATA_KEY,
       context.getHandler(),
     );
-    
-    return requiredRights.some((right) => user.roles.some((role) => role.permissions.some((permission) => permission.name === right)));
+    if (requiredRights.some((right) => user.roles.some((role) => role.permissions.some((permission) => permission.name === right)))) {
+      return context.switchToHttp().getNext();
+    }
+    return context.switchToHttp().getResponse().status(401).send({
+      message: "You're not authenticated"
+    });
   };
 };

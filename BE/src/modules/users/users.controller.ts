@@ -14,15 +14,21 @@ import { Identified } from '../auth/decorators/identified.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService,
     private readonly jwtService: JwtService) { }
-  
+
   @Get('me')
-  // @UseGuards(AuthGuard)
-  @SetMetadata(ACCESS_RIGHT_META_DATA_KEY, ["post"])
+  @SetMetadata(ACCESS_RIGHT_META_DATA_KEY, ["view_my_profile"])
   @CanAccessBy()
   async getInfomationMe(@Req() req: Request, @Res() res: Response): Promise<Response> {
     const user: User = req['user'];
+    user.roles.map(role => {
+      delete role.permissions
+      delete role.id
+      delete role.isEditable
+      console.log("🚀 ~ UsersController ~ getInfomationMe ~ role:", role)
+      return role;
+    })
     delete user.password;
-    return res.status(201).json({user});
+    return res.status(201).json({ user });
   }
 
   // @Put('me')
@@ -35,29 +41,34 @@ export class UsersController {
   // };
 
   @Get()
-  @UseGuards(AuthGuard)
+  @SetMetadata(ACCESS_RIGHT_META_DATA_KEY, ["view_list_user"])
+  @CanAccessBy()
   async getUsers(@Req() req: Request, @Query() pagination: Pagination, @Res() res: Response): Promise<Response> {
     try {
+      if (pagination) {
+        pagination.limit = 20;
+        pagination.page = 1;
+      }
       const users: User[] = await this.usersService.getUsers(pagination.page, pagination.limit);
-      return res.status(200).json({users});
+      return res.status(200).json({ users });
     } catch (error) {
-      return res.status(500).json({ 
-        message: 'Internal server error in ...', 
+      return res.status(500).json({
+        message: 'Internal server error in ...',
       });
     }
   };
-  
+
   @Post(':id')
   @UseGuards(AuthGuard)
-  @UsePipes(new UserValidationPipe()  )
+  @UsePipes(new UserValidationPipe())
   async getUserById(@Param('id') id: string, @Res() res: Response): Promise<Response> {
     try {
       // return res.status(200).json(await this.usersService.getUserById(id));
       return res.sendStatus(200)
     }
     catch (error) {
-      return res.status(500).json({ 
-        message: 'Internal server error in ...', 
+      return res.status(500).json({
+        message: 'Internal server error in ...',
       });
     }
   }
