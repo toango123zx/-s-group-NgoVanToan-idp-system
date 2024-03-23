@@ -2,14 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/service/prisma.service';
 import { RegisterBodyRequestDto } from '../dto/request/body/register.body.request.dto';
 import { User } from 'src/modules/users/models/user.model';
-import { RolesService } from './roles.service';
-import { NameRoleEnum } from '../enums/role.enum';
+import { EnumRoles } from '../enums/roles.enum';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly prismaService: PrismaService) { }
 
-    async validateUser(username: string): Promise<User>{
+    async validateUser(username: string): Promise<User> {
         try {
             return await this.prismaService.users.findUnique({
                 select: {
@@ -41,10 +40,10 @@ export class AuthService {
             throw new Error(error);
         }
     }
-    
-    async registerUser(user: RegisterBodyRequestDto, role: string = 'user'): Promise<boolean> {
+
+    async registerUser(user: RegisterBodyRequestDto, role: string = EnumRoles.USER): Promise<boolean> {
         try {
-            if (NameRoleEnum[role] === undefined) {
+            if (EnumRoles[role] === undefined) {
                 throw new Error('Role is not exist');
             }
             await this.prismaService.users.create({
@@ -77,15 +76,14 @@ export class AuthService {
                     age: user.age,
                     roles: {
                         connect: {
-                            name: NameRoleEnum[role],
+                            name: EnumRoles[role],
                         }
                     }
-                
+
                 },
             });
             return true;
         } catch (error) {
-            console.log("🚀 ~ AuthService ~ registerUser ~ error:", error)
             throw new Error('Prisma error in registerUser service');
         }
     }

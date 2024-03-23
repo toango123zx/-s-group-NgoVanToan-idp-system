@@ -3,7 +3,7 @@ import { Permission } from "./permission.model copy";
 
 
 export interface Role {
-    id: string;
+    id?: string;
     name: string;
     description?: string;
     isEditable?: boolean;

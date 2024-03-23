@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/service/prisma.service';
 import { User } from '../models/user.model';
 import { UpdateInfomationBodyRequestDto } from '../dto/request/body/update-infomation.body.request.dto';
+import { SearchUserParamsRequestDto } from '../dto/request/params/searchUser.params.request.dto';
+import { EnumSearchMode } from 'prisma/enums/query.enum';
 
 @Injectable()
 export class UsersService {
@@ -83,5 +85,38 @@ export class UsersService {
         } catch (error) {
             throw error;
         }
-    }
+    };
+
+    async getUsersByNameOrEmail(user: SearchUserParamsRequestDto, searchMode: EnumSearchMode = EnumSearchMode.EQUAL): Promise<User[]> {
+        if (user.fullName === undefined && user.email === undefined) {
+            return [];
+        };
+
+        try {
+            return await this.prismaService.users.findMany({
+                select: {
+                    id: true,
+                    username: true,
+                    fullName: true,
+                    email: true,
+                    age: true,
+                    roles: {
+                        select: {
+                            name: true
+                        }
+                    }
+                },
+                where: {
+                    fullName: {
+                        [searchMode]: user.fullName
+                    },
+                    email: {
+                        [searchMode]: user.email
+                    }
+                }
+            });
+        } catch (error) {
+            throw error;
+        };
+    };
 }
