@@ -41,10 +41,10 @@ export class AuthService {
         }
     }
 
-    async registerUser(user: RegisterBodyRequestDto, role: string = EnumRoles.USER): Promise<boolean> {
+    async registerUser(user: RegisterBodyRequestDto, role: EnumRoles = EnumRoles.USER): Promise<boolean> {
         try {
-            if (EnumRoles[role] === undefined) {
-                throw new Error('Role is not exist');
+            if (!Object.values(EnumRoles).includes(role)) {
+                throw new Error('Role is not valid');
             }
             await this.prismaService.users.create({
                 select: {
@@ -76,7 +76,7 @@ export class AuthService {
                     age: user.age,
                     roles: {
                         connect: {
-                            name: EnumRoles[role],
+                            name: role,
                         }
                     }
 

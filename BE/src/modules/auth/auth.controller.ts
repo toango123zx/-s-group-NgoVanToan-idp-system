@@ -1,77 +1,52 @@
-import { Body, Controller, Get, Inject, Options, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Body, Controller, Post, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { LoginBodyRequestDto } from './dto/request/body/login.body.request.dto';
 import { AuthService } from './services/auth.service';
-import { createJwt, verifyJwt } from './strategies/jwt.strategy';
+import { createJwt } from './strategies/jwt.strategy';
 import { comparePassword, passwordHashing } from './strategies/hashPassword.strategy';
 import { RegisterBodyRequestDto } from './dto/request/body/register.body.request.dto';
 import { TokenBodyResponseDto } from './dto/respone/body/token.body.respone.dto';
 import { RedisService } from '../redis/services/redis.service';
-import { AuthGuard } from './guards/auth.guard';
-import { from } from 'rxjs';
-import { AuthValidationPipe } from './pipes/authValidation.pipe';
+import { CanAccessBy } from './decorators/can-access-by.decorator';
+import { UserAuth } from './decorators/userAuth.decorator';
+import { User } from '../users/models/user.model';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService,
     private readonly redisService: RedisService) { }
-    
+
   @Post("login")
   @UsePipes(new ValidationPipe({ transform: true }))
-  async login(@Body() login: LoginBodyRequestDto, @Res() res: Response): Promise<Response> {
+  async login(@Body() login: LoginBodyRequestDto) {
     const user = await this.authService.validateUser(login.username);
     if (!user) {
-      return res.status(404).json({
-        message: "User does not exist"
-      });
-    }
-    try {
-      if (!await comparePassword(login.password, user.password)) {
-        return res.status(401).json({
-          message: "Invalid password"
-        });
-      }
-    } catch (error) {
-      res.status(500).json({
-        message: "Query user auth service failed"
-      });
-    }
+      throw new Error("User does not exist");
+    };
+    if (!await comparePassword(login.password, user.password)) {
+      throw new Error("Invalid password");
+    };
 
-    try {
-      delete user.password;
-      await this.redisService.set(user.id, user)
-      const token: TokenBodyResponseDto = new TokenBodyResponseDto(await createJwt({id: user.id}));
-      
-      return res.status(200).json({
-        token: token,
-        user: user
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: "Create jwt failed"
-      });
-    }
-  }
+    delete user.password;
+    await this.redisService.set(user.id, user)
+    const token: TokenBodyResponseDto = new TokenBodyResponseDto(await createJwt({ id: user.id }));
+
+    return {
+      acessToken: token,
+      user: user
+    };
+  };
 
   @Post("register")
-  async register(@Body() userInformation: RegisterBodyRequestDto, @Res() res: Response): Promise<Response> {
-    try {
+  async register(@Body() userInformation: RegisterBodyRequestDto) {
       userInformation.password = await passwordHashing(userInformation.password);
       await this.authService.registerUser(userInformation);
+      return;
+  };
 
-      return res.sendStatus(201);
-    } catch (error) {
-      return res.status(500).json({ 
-        message: 'Internal server error in ...', 
-      });
-    }
-  }
-  
   @Post("logout")
-  @UseGuards(AuthGuard)
-  async logout(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const token = req.headers.authorization.split(" ")[1];
-    await this.redisService.del(token);
-    return res.sendStatus(200);
-  }
+  @CanAccessBy()
+  async logout(@UserAuth() user: User) {
+    await this.redisService.del(user.id);
+    return;
+  };
 }

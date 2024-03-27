@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, IsNotEmpty, IsObject, IsString } from "class-validator";
+import { IsEmail, IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class RegisterBodyRequestDto {
     @IsString()

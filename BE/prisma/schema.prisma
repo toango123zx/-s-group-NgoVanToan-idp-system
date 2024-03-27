@@ -23,15 +23,15 @@ model Users {
   roles     Roles[]
 }
 
-enum Role {
-  superAdmin
-  admin
-  user
-}
+// enum Role {
+//   superAdmin
+//   admin
+//   user
+// }
 
 model Roles {
   id          String        @id @default(uuid())
-  name        Role          @unique
+  name        String          @unique
   description String
   isEditable  Boolean       @default(false)
   createdAt   DateTime      @default(now())

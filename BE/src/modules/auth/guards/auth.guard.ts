@@ -8,35 +8,19 @@ import { User } from "src/modules/users/models/user.model";
 export class AuthGuard implements CanActivate {
     constructor(private readonly redisService: RedisService) {}
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        try {
             const request = context.switchToHttp().getRequest();
-            let token = request.headers.authorization.split(" ")[1];
-
+            let token = request.headers.authorization;
             if (!token) {
                 return context.switchToHttp().getResponse().status(401).send({
                     message: "You're not authenticated"
                 });
             };
 
-            const userID: Jwt = await _jwtService.verifyAsync<Jwt>(token);
+            const userID: Jwt = await _jwtService.verifyAsync<Jwt>(token.split(" ")[1]);
             
             const user = await this.redisService.get<User>(userID.id);
-
-            // token = await this.redisService.get<string>(userID.data);
-            // const user: Jwt = await _jwtService.verifyAsync<Jwt>(token);
-
-            // delete user.iat; 
-            // delete user.exp;
             request.user = user;
-            // return context.switchToHttp().getResponse().status(401).send({
-            //     message: "You're not authenticated"
-            // });
 
             return context.switchToHttp().getNext();
-        } catch (error) {
-            return context.switchToHttp().getResponse().status(401).send({
-                message: "You're not authenticated"
-            });
-        };
     };
 };

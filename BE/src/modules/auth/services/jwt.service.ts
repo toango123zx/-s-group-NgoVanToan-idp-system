@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { RedisService } from 'src/modules/redis/services/redis.service';
 import { TokenBodyResponseDto } from '../dto/respone/body/token.body.respone.dto';
 import { createJwt } from '../strategies/jwt.strategy';
-import { User } from 'src/modules/users/models/user.model';
 
 @Injectable()
 export class JwtService {
